@@ -8,6 +8,8 @@ export interface IUserDocument extends Document {
   startWeight?: number;
   dailyCalorieTarget: number;
   proteinTarget: number;
+  challengeStartDate?: Date;
+  challengeStartWeight?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +23,8 @@ const UserSchema = new Schema<IUserDocument>(
     startWeight: { type: Number },
     dailyCalorieTarget: { type: Number, default: 2000 },
     proteinTarget: { type: Number, default: 150 },
+    challengeStartDate: { type: Date },
+    challengeStartWeight: { type: Number },
   },
   { timestamps: true }
 );

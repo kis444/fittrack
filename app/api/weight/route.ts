@@ -9,13 +9,27 @@ export async function GET(req: NextRequest) {
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const limit = parseInt(searchParams.get("limit") || "90");
+  const days = parseInt(searchParams.get("days") || "0");
+  const all = searchParams.get("all") === "true";
 
   await dbConnect();
-  const entries = await WeightEntry.find({ userId: (session.user as { id: string }).id })
-    .sort({ date: -1 })
-    .limit(limit);
-  return NextResponse.json(entries.reverse());
+
+  const query: Record<string, unknown> = { userId: (session.user as { id: string }).id };
+
+  // Filter by actual date range (not entry count) when days param is provided
+  if (days > 0) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+    since.setHours(0, 0, 0, 0);
+    query.date = { $gte: since };
+  }
+
+  const entries = await WeightEntry.find(query)
+    .sort({ date: all ? 1 : -1 })
+    .limit(all ? 0 : 500); // no limit when fetching all
+
+  // Return in chronological order
+  return NextResponse.json(all ? entries : entries.reverse());
 }
 
 export async function POST(req: NextRequest) {

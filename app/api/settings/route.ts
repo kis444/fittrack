@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
     startWeight: user.startWeight,
     dailyCalorieTarget: user.dailyCalorieTarget,
     proteinTarget: user.proteinTarget,
+    challengeStartDate: user.challengeStartDate ?? null,
+    challengeStartWeight: user.challengeStartWeight ?? null,
   });
 }
 
@@ -36,6 +38,16 @@ export async function PUT(req: NextRequest) {
       dailyCalorieTarget: body.dailyCalorieTarget,
       proteinTarget: body.proteinTarget,
     };
+
+    // Challenge fields — only update if explicitly provided
+    if (body.challengeStartDate !== undefined) {
+      updateData.challengeStartDate = body.challengeStartDate
+        ? new Date(body.challengeStartDate)
+        : null;
+    }
+    if (body.challengeStartWeight !== undefined) {
+      updateData.challengeStartWeight = body.challengeStartWeight ?? null;
+    }
 
     if (body.password) {
       updateData.password = await bcrypt.hash(body.password, 12);
